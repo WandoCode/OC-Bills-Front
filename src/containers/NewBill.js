@@ -23,8 +23,8 @@ export default class NewBill {
       .files[0]
     const filePath = e.target.value.split(/\\/g)
     const fileName = filePath[filePath.length - 1]
-    const fileExtension = fileName.split('.')[length - 1]
     //TODO: (mentor) A mettre ou non? Pas utile si la restriction d'extension sur l'input:file est suffisante
+    //const fileExtension = fileName.split('.')[length - 1]
     // const authorizedExtensions = ['jpg', 'png', 'jpeg']
     // const fileHaveAuthorizedExtension = authorizedExtensions.some(
     //   (a) => a === fileExtension
