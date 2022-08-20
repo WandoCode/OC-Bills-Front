@@ -51,6 +51,7 @@ export default class Login {
         (err) => this.createUser(user)
       )
       .then(() => {
+        console.log();
         this.onNavigate(ROUTES_PATH['Dashboard'])
         this.PREVIOUS_LOCATION = ROUTES_PATH['Dashboard']
         PREVIOUS_LOCATION = this.PREVIOUS_LOCATION
