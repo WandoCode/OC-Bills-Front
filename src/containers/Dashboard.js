@@ -67,11 +67,13 @@ export const getStatus = (index) => {
   }
 }
 
+
 export default class {
   constructor({ document, onNavigate, store, bills, localStorage }) {
     this.document = document
     this.onNavigate = onNavigate
     this.store = store
+    this.openMenus = {1: false, 2: false, 3: false}
     $('#arrow-icon1').click((e) => this.handleShowTickets(e, bills, 1))
     $('#arrow-icon2').click((e) => this.handleShowTickets(e, bills, 2))
     $('#arrow-icon3').click((e) => this.handleShowTickets(e, bills, 3))
@@ -133,12 +135,15 @@ export default class {
   handleShowTickets(e, bills, index) {
     if (this.counter === undefined || this.index !== index) this.counter = 0
     if (this.index === undefined || this.index !== index) this.index = index
+    if(this.openMenus[index] === true) this.counter = 1
     if (this.counter % 2 === 0) {
+      this.openMenus[index] = true
       $(`#arrow-icon${this.index}`).css({ transform: 'rotate(0deg)'})
       $(`#status-bills-container${this.index}`)
         .html(cards(filteredBills(bills, getStatus(this.index))))
       this.counter ++
     } else {
+      this.openMenus[index] = false
       $(`#arrow-icon${this.index}`).css({ transform: 'rotate(90deg)'})
       $(`#status-bills-container${this.index}`)
         .html("")
