@@ -35,13 +35,10 @@ describe('Given I am connected as an employee', () => {
   })
 
   describe('When I click on the eye icon on a bill row', () => {
-    test('Then I should render a modal ', async () => {
-      // Affiche l'ecran bills employee
+    test('Then it should render a modal ', async () => {
       document.body.innerHTML = BillsUI({ data: [bills[0]] })
 
-      const onNavigate = (pathname) => {
-        return
-      }
+      const onNavigate = () => {}
 
       $.fn.modal = jest.fn()
 
@@ -56,14 +53,22 @@ describe('Given I am connected as an employee', () => {
       userEvent.click(iconEye)
 
       const modalImg = screen.getByTestId('employee-modal')
-      expect(modalImg).toBeDefined()
+      const imgURL = modalImg.getAttribute('src')
+      expect(imgURL).toEqual(bills[0].fileUrl)
     })
   })
-})
-describe('When I am on Bills page but page is loading', () => {
-  test('then it should render Loading page', () => {
-    document.body.innerHTML = BillsUI({ loading: true })
-    expect(screen.getAllByText('Loading...')).toBeTruthy()
+
+  describe('When I am on Bills page but page is loading', () => {
+    test('then it should render Loading page', () => {
+      document.body.innerHTML = BillsUI({ loading: true })
+      expect(screen.getAllByText('Loading...')).toBeTruthy()
+    })
+  })
+  describe('When I am on Bills page but back-end return an error message', () => {
+    test('then it should render Loading page', () => {
+      document.body.innerHTML = BillsUI({ error: 'error message' })
+      expect(screen.getAllByText('Erreur')).toBeTruthy()
+    })
   })
 })
 
@@ -85,7 +90,7 @@ describe('When I am on Bills page, there are 4 bills', () => {
   })
 })
 
-// Test t'intégration GET
+// Test t'intégration GET //TODO: a finir
 describe('Given I am a user connected as employee', () => {
   describe('When I navigate to Bills view', () => {
     test('fetches bills from mock API GET', async () => {
@@ -100,7 +105,7 @@ describe('Given I am a user connected as employee', () => {
       window.onNavigate(ROUTES_PATH.Bills)
       await waitFor(() => screen.getByText('Mes notes de frais'))
       const tBody = screen.getByTestId('tbody')
-      expect(tBody.childNodes.length).not.toEqual(0)
+      expect(tBody.children.length).toEqual(4)
     })
   })
 })
