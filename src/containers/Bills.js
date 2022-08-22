@@ -15,7 +15,7 @@ export default class {
     const iconEye = document.querySelectorAll(`div[data-testid="icon-eye"]`)
     if (iconEye)
       iconEye.forEach((icon) => {
-        icon.addEventListener('click', () => this.handleClickIconEye(icon))
+        icon.addEventListener('click', (e) => this.handleClickIconEye(e))
       })
     new Logout({ document, localStorage, onNavigate })
   }
@@ -24,13 +24,14 @@ export default class {
     this.onNavigate(ROUTES_PATH['NewBill'])
   }
 
-  handleClickIconEye = (icon) => {
+  handleClickIconEye = (e) => {
+    const icon = e.target.parentNode.parentNode
     const billUrl = icon.getAttribute('data-bill-url')
     const imgWidth = Math.floor($('#modaleFile').width() * 0.5)
     $('#modaleFile')
       .find('.modal-body')
       .html(
-        `<div style='text-align: center;' class="bill-proof-container"><img width=${imgWidth} src=${billUrl} alt="Bill" /></div>`
+        `<div style='text-align: center;'  class="bill-proof-container"><img width=${imgWidth} src=${billUrl} alt="Bill" data-testid="employee-modal"/></div>`
       )
     $('#modaleFile').modal('show')
   }
