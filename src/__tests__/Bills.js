@@ -35,7 +35,7 @@ describe('Given I am connected as an employee', () => {
   })
 
   describe('When I click on the eye icon on a bill row', () => {
-    test('Then it should render a modal ', async () => {
+    test('Then it should render the modal filled with the correct picture', async () => {
       document.body.innerHTML = BillsUI({ data: [bills[0]] })
 
       const onNavigate = () => {}
@@ -64,29 +64,30 @@ describe('Given I am connected as an employee', () => {
       expect(screen.getAllByText('Loading...')).toBeTruthy()
     })
   })
+
   describe('When I am on Bills page but back-end return an error message', () => {
     test('then it should render Loading page', () => {
       document.body.innerHTML = BillsUI({ error: 'error message' })
       expect(screen.getAllByText('Erreur')).toBeTruthy()
     })
   })
-})
 
-describe('When I am on Bills page, there are 4 bills', () => {
-  test('Then getBills should return 4 bills', async () => {
-    const onNavigate = (pathname) => {
-      return
-    }
+  describe('When I am on Bills page, there are 4 bills', () => {
+    test('Then getBills should return 4 bills', async () => {
+      const onNavigate = (pathname) => {
+        return
+      }
 
-    const billsModel = new Bills({
-      document,
-      onNavigate,
-      store: mockStore,
-      localStorage: null,
+      const billsModel = new Bills({
+        document,
+        onNavigate,
+        store: mockStore,
+        localStorage: null,
+      })
+
+      const billsArray = await billsModel.getBills()
+      expect(billsArray.length).toEqual(4)
     })
-
-    const billsArray = await billsModel.getBills()
-    expect(billsArray.length).toEqual(4)
   })
 })
 
@@ -106,6 +107,51 @@ describe('Given I am a user connected as employee', () => {
       await waitFor(() => screen.getByText('Mes notes de frais'))
       const tBody = screen.getByTestId('tbody')
       expect(tBody.children.length).toEqual(4)
+    })
+  })
+
+  describe('When an error occurs on API', () => {
+    beforeEach(() => {
+      // .bills doit être mocker pour pouvoir ensuite utilisé .mockImplementationOnce dans chaque test
+      jest.spyOn(mockStore, 'bills')
+      localStorage.setItem(
+        'user',
+        JSON.stringify({ type: 'Employee', email: 'a@a' })
+      )
+      const root = document.createElement('div')
+      root.setAttribute('id', 'root')
+      document.body.appendChild(root)
+      router()
+    })
+
+    test('fetches bills from an API and fails with 404 message error', async () => {
+      mockStore.bills.mockImplementationOnce(() => {
+        return {
+          list: () => {
+            return Promise.reject(new Error('Erreur 404'))
+          },
+        }
+      })
+
+      window.onNavigate(ROUTES_PATH.Bills)
+      await new Promise(process.nextTick)
+      const message = await screen.getByText(/Erreur 404/)
+      expect(message).toBeTruthy()
+    })
+
+    test('fetches bills from an API and fails with 500 message error', async () => {
+      mockStore.bills.mockImplementationOnce(() => {
+        return {
+          list: () => {
+            return Promise.reject(new Error('Erreur 500'))
+          },
+        }
+      })
+
+      window.onNavigate(ROUTES_PATH.Bills)
+      await new Promise(process.nextTick)
+      const message = await screen.getByText(/Erreur 500/)
+      expect(message).toBeTruthy()
     })
   })
 })

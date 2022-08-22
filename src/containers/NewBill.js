@@ -15,6 +15,7 @@ export default class NewBill {
     this.fileUrl = null
     this.fileName = null
     this.billId = null
+    this.formData = null
     new Logout({ document, localStorage, onNavigate })
   }
   handleChangeFile = (e) => {
@@ -24,36 +25,34 @@ export default class NewBill {
     const filePath = e.target.value.split(/\\/g)
     const fileName = filePath[filePath.length - 1]
     //TODO: (mentor) A mettre ou non? Pas utile si la restriction d'extension sur l'input:file est suffisante
-    //const fileExtension = fileName.split('.')[length - 1]
-    // const authorizedExtensions = ['jpg', 'png', 'jpeg']
-    // const fileHaveAuthorizedExtension = authorizedExtensions.some(
-    //   (a) => a === fileExtension
-    // )
-    // if (!fileHaveAuthorizedExtension) {
-    //   console.log(1)
-    //   file.value = '' // TODO: N'a pas le résultat escompté
-    //   return
-    // }
-    const formData = new FormData()
+    const fileExtension = fileName.split('.').at(-1)
+    const authorizedExtensions = ['jpg', 'png', 'jpeg']
+    const fileHaveAuthorizedExtension = authorizedExtensions.some(
+      (a) => a === fileExtension
+    )
+    if (!fileHaveAuthorizedExtension) {
+      throw new Error('Accepted extensions: png, jpg, jpeg')
+    }
+    this.formData = new FormData()
     const email = JSON.parse(localStorage.getItem('user')).email
-    formData.append('file', file)
-    formData.append('email', email)
-
-    this.store
-      .bills()
-      .create({
-        data: formData,
-        headers: {
-          noContentType: true,
-        },
-      })
-      .then(({ fileUrl, key }) => {
-        console.log(fileUrl)
-        this.billId = key
-        this.fileUrl = fileUrl
-        this.fileName = fileName
-      })
-      .catch((error) => console.error(error))
+    this.formData.append('file', file)
+    this.formData.append('email', email)
+    this.fileName = fileName
+    // TODO: (mentor) quand un fichier est déposé (bonne extension), ca envoie directement une requete au backend pour créer une nouvelle note de frais dans la base de données. On laisse ca comme ca? => Même si on annule le form d'une nouvelle note de frais, on se retrouve avec une ligne mal remplie dans la vue Bills...
+    // this.store
+    //   .bills()
+    //   .create({
+    //     data: formData,
+    //     headers: {
+    //       noContentType: true,
+    //     },
+    //   })
+    //   .then(({ fileUrl, key }) => {
+    //     this.billId = key
+    //     this.fileUrl = fileUrl
+    //     this.fileName = fileName
+    //   })
+    //   .catch((error) => console.error(error))
   }
   handleSubmit = (e) => {
     e.preventDefault()
@@ -76,11 +75,34 @@ export default class NewBill {
         20,
       commentary: e.target.querySelector(`textarea[data-testid="commentary"]`)
         .value,
-      fileUrl: this.fileUrl,
-      fileName: this.fileName,
-      status: 'pending',
+      // fileUrl: this.fileUrl,
+      // fileName: this.fileName,
+      // status: 'pending',
     }
-    this.updateBill(bill)
+
+    this.store
+      .bills()
+      .create({
+        data: this.formData,
+        headers: {
+          noContentType: true,
+        },
+      })
+      .then(({ fileUrl, key }) => {
+        this.billId = key
+        this.fileUrl = fileUrl
+      })
+      // Added
+      .then(() => {
+        bill.billId = this.billId
+        bill.fileName = this.fileName
+        bill.fileUrl = this.fileUrl
+        bill.status = 'pending'
+        this.updateBill(bill)
+      })
+      //Fin added
+      .catch((error) => console.error(error))
+    // this.updateBill(bill)
     this.onNavigate(ROUTES_PATH['Bills'])
   }
 
