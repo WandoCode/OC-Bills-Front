@@ -18,6 +18,7 @@ export default class NewBill {
     this.formData = null
     new Logout({ document, localStorage, onNavigate })
   }
+
   handleChangeFile = (e) => {
     e.preventDefault()
     const file = this.document.querySelector(`input[data-testid="file"]`)
@@ -37,7 +38,8 @@ export default class NewBill {
     const email = JSON.parse(localStorage.getItem('user')).email
     this.formData.append('file', file)
     this.formData.append('email', email)
-    this.fileName = fileName
+    this.formData.append('fileName', fileName)
+
     // TODO: (mentor) quand un fichier est déposé (bonne extension), ca envoie directement une requete au backend pour créer une nouvelle note de frais dans la base de données. On laisse ca comme ca? => Même si on annule le form d'une nouvelle note de frais, on se retrouve avec une ligne mal remplie dans la vue Bills...
     // this.store
     //   .bills()
@@ -96,7 +98,6 @@ export default class NewBill {
       // Added
       .then(() => {
         bill.billId = this.billId
-        bill.fileName = this.fileName
         bill.fileUrl = this.fileUrl
         bill.status = 'pending'
         this.updateBill(bill)
