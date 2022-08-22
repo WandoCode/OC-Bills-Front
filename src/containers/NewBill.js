@@ -80,6 +80,7 @@ export default class NewBill {
       // status: 'pending',
     }
 
+    //TODO: juste faire le create(), sans devoir faire le update() ensuite...
     this.store
       .bills()
       .create({
