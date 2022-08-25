@@ -44,25 +44,57 @@ describe('Given I am connected as an employee', () => {
 
       const expenseType = screen.getByTestId('expense-type')
       expect(expenseType).toBeDefined()
+
       const expenseName = screen.getByTestId('expense-name')
       expect(expenseName).toBeDefined()
+
       const datepicker = screen.getByTestId('datepicker')
       expect(datepicker).toBeDefined()
+
       const amount = screen.getByTestId('amount')
       expect(amount).toBeDefined()
+
       const vat = screen.getByTestId('vat')
       expect(vat).toBeDefined()
+
       const pct = screen.getByTestId('pct')
       expect(pct).toBeDefined()
+
       const commentary = screen.getByTestId('commentary')
       expect(commentary).toBeDefined()
+
       const file = screen.getByTestId('file')
       expect(file).toBeDefined()
     })
   })
 })
+describe('Given that I am on the FormNewBill view', () => {
+  describe('When I fill the file input', () => {
+    test.only('Then it should populate the NewBill.formData (.fileName, .file, .email)', async () => {
+      document.body.innerHTML = NewBillUI()
+      const onNavigate = () => {}
+      const newBillModel = new NewBill({
+        document,
+        onNavigate,
+        store: mockStore,
+        localStorage: null,
+      })
+      // FIXME: En cours, a terminer
+      // const handleChangeFile = jest.fn((e) => newBillModel.handleChangeFile(e))
+      // TODO:(mentor) Pas possible de remplir un champs input:file avec userEvent.type(...)
+      // Il faut passer par userEvent.upload qui demande un objet File
+      const file = new File(['fichier test'], 'test/hello.png', {
+        type: 'image/png',
+      })
 
-/* TODO Test
+      const fileInput = screen.getByTestId('file')
+
+      await userEvent.upload(fileInput, file)
+    })
+  })
+})
+
+/* TODO Test à implémenter
 
 Given I am connected as employee
     When I am on NewBill page
@@ -75,11 +107,13 @@ Given I am connected as employee
     
     When I fill the formNewBill correctley
         Then I should be able to submit the form (check values of final 'bill')
+        Then I should be redirect to Bills view and a new bill is present with 'pending' statuts
       
     When I fill the formNewBill incorrectley
         Then I shouldn't be able to submit the form
     
     When I fill the file input in formNewBill
+        Then it should trigger the onChange
       Without sending the form
         Then it should not create a new line in Bills view
 */
