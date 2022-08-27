@@ -17,9 +17,8 @@ jest.mock('../app/store', () => mockStore)
 describe('Given I am connected as an employee', () => {
   describe('When I click on the New Bill button', () => {
     test('Then I should render the New Bill form', async () => {
-      // Affiche l'ecran employee
       document.body.innerHTML = BillsUI({ data: bills })
-      // Mime le comportement de window.onNavigate dans Router.js (avec juste ce qui est intéressant pour le test)
+
       const onNavigate = (pathname) => {
         document.body.innerHTML = ROUTES({ pathname })
       }
@@ -54,29 +53,14 @@ describe('Given I am connected as an employee', () => {
 
       const modalImg = screen.getByTestId('employee-modal')
       const imgURL = modalImg.getAttribute('src')
+
       expect(imgURL).toEqual(bills[0].fileUrl)
-    })
-  })
-
-  describe('When I am on Bills page but page is loading', () => {
-    test('then it should render Loading page', () => {
-      document.body.innerHTML = BillsUI({ loading: true })
-      expect(screen.getAllByText('Loading...')).toBeTruthy()
-    })
-  })
-
-  describe('When I am on Bills page but back-end return an error message', () => {
-    test('then it should render Loading page', () => {
-      document.body.innerHTML = BillsUI({ error: 'error message' })
-      expect(screen.getAllByText('Erreur')).toBeTruthy()
     })
   })
 
   describe('When I am on Bills page, there are 4 bills', () => {
     test('Then getBills should return 4 bills', async () => {
-      const onNavigate = (pathname) => {
-        return
-      }
+      const onNavigate = () => {}
 
       const billsModel = new Bills({
         document,
@@ -86,6 +70,7 @@ describe('Given I am connected as an employee', () => {
       })
 
       const billsArray = await billsModel.getBills()
+
       expect(billsArray.length).toEqual(4)
     })
   })

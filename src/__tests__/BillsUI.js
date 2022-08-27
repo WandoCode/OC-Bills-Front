@@ -42,5 +42,35 @@ describe('Given I am connected as an employee', () => {
       const datesSorted = [...dates].sort(antiChrono)
       expect(dates).toEqual(datesSorted)
     })
+
+    test('Then a bill row should display the bill s type, name, date, amount, status and the eye icon', () => {
+      document.body.innerHTML = BillsUI({ data: [bills[0]] })
+
+      const typeCell = screen.getByText(bills[0].type)
+      const nameCell = screen.getByText(bills[0].name)
+      const dateCell = screen.getByText(bills[0].date)
+      const amountCell = screen.getByText(bills[0].amount + ' €')
+      const statusCell = screen.getByText(bills[0].status)
+
+      expect(typeCell).toBeTruthy()
+      expect(nameCell).toBeTruthy()
+      expect(dateCell).toBeTruthy()
+      expect(amountCell).toBeTruthy()
+      expect(statusCell).toBeTruthy()
+    })
+  })
+
+  describe('When I am on Bills page but page is loading', () => {
+    test('then it should render Loading page', () => {
+      document.body.innerHTML = BillsUI({ loading: true })
+      expect(screen.getAllByText('Loading...')).toBeTruthy()
+    })
+  })
+
+  describe('When I am on Bills page but back-end return an error message', () => {
+    test('then it should render Loading page', () => {
+      document.body.innerHTML = BillsUI({ error: 'error message' })
+      expect(screen.getAllByText('Erreur')).toBeTruthy()
+    })
   })
 })
