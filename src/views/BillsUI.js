@@ -6,7 +6,7 @@ import Actions from './Actions.js'
 
 const row = (bill) => {
   return `
-    <tr>
+    <tr data-testid="trow">
       <td>${bill.type}</td>
       <td>${bill.name}</td>
       <td>${bill.date}</td>
@@ -77,7 +77,7 @@ export default ({ data: bills, loading, error }) => {
                 <th>Actions</th>
               </tr>
           </thead>
-          <tbody data-testid="tbody">
+          <tbody >
             ${rows(bills)}
           </tbody>
           </table>

@@ -80,18 +80,26 @@ describe('Given I am connected as an employee', () => {
 describe('Given I am a user connected as employee', () => {
   describe('When I navigate to Bills view', () => {
     test('fetches bills from mock API GET', async () => {
+      const nbrBillsInMockStore = (await mockStore.bills().list()).length
+
       localStorage.setItem(
         'user',
         JSON.stringify({ type: 'Employee', email: 'a@a' })
       )
+
       const root = document.createElement('div')
       root.setAttribute('id', 'root')
       document.body.append(root)
       router()
+
       window.onNavigate(ROUTES_PATH.Bills)
+
       await waitFor(() => screen.getByText('Mes notes de frais'))
-      const tBody = screen.getByTestId('tbody')
-      expect(tBody.children.length).toEqual(4)
+
+      const trows = screen.getAllByTestId('trow')
+
+      expect(trows).toBeTruthy()
+      expect(trows.length).toEqual(nbrBillsInMockStore)
     })
   })
 
