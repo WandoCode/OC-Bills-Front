@@ -101,7 +101,6 @@ export default class NewBill {
       //Fin added
       .catch((error) => console.error(error))
     // this.updateBill(bill)
-    this.onNavigate(ROUTES_PATH['Bills'])
   }
 
   // not need to cover this function by tests

@@ -108,15 +108,90 @@ describe('Given that I am on the FormNewBill view', () => {
       expect(newBillModel.formData.get('file').name).toBe(file.name)
     })
   })
-
+  describe('When I click on submit btn', () => {
+    test('It should trigger the handleSubmit fct', () => {
+      // TODO
+    })
+  })
   describe('When I submit a valid filled form', () => {
-    then('It should create a new bill in db', () => {
-      //
+    test.only('It should compute correct datas for bill creation', async () => {
+      const mockFormData = {
+        name: 'Bill Test',
+        date: '2022-07-15',
+        amount: '100',
+        vat: '20',
+        pct: '5',
+        commentary: 'Test Commentary',
+        file: new File(['test file'], 'fileTest.jpg', {
+          type: 'image/png',
+        }),
+      }
+
+      const userEmail = 'a@a'
+      localStorage.setItem(
+        'user',
+        JSON.stringify({
+          type: 'Employee',
+          email: userEmail,
+        })
+      )
+
+      document.body.innerHTML = NewBillUI()
+
+      const onNavigate = () => {}
+
+      const newBillModel = new NewBill({
+        document,
+        onNavigate,
+        store: mockStore,
+        localStorage: null,
+      })
+
+      const typeField = screen.getByTestId('expense-type')
+      userEvent.selectOptions(typeField, screen.getByText('Transports'))
+      // expect(screen.getByText('Transports').selected).toBeTruthy()
+
+      const nameField = screen.getByTestId('expense-name')
+      userEvent.type(nameField, mockFormData.name)
+
+      const dateField = screen.getByTestId('datepicker')
+      userEvent.type(dateField, mockFormData.date)
+
+      const amountField = screen.getByTestId('amount')
+      userEvent.type(amountField, mockFormData.amount)
+
+      const vatField = screen.getByTestId('vat')
+      userEvent.type(vatField, mockFormData.vat)
+
+      const pctField = screen.getByTestId('pct')
+      userEvent.type(pctField, mockFormData.pct)
+
+      const commentaryField = screen.getByTestId('commentary')
+      userEvent.type(commentaryField, mockFormData.commentary)
+
+      const fileInput = screen.getByTestId('file')
+      userEvent.upload(fileInput, mockFormData.file)
+
+      const submitBtn = screen.getByText('Envoyer')
+      userEvent.click(submitBtn)
+
+      //  TODO:(mentor) J'ai rempli mon formulaire: comment je peux vérifier que si je clique sur 'Envoyer', la fct handleSubmit fait bien son travail?
+    })
+    test('It should trigger the .create fct of store with correct datas', () => {
+      // TODO
+    })
+    test('It should trigger the .update fct of store with correct data', () => {
+      // TODO
+    })
+
+    test('It should redirect to Bills view', () => {
+      // TODO
     })
   })
 })
 
 /* TODO Test à implémenter
+TEST that File is ONLY JPG JPEG PNG !!!!
 
 Given I am connected as employee
     When I am on NewBill page
