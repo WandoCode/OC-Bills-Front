@@ -72,12 +72,13 @@ describe('Given I am connected as an employee', () => {
 
 describe('Given that I am on the FormNewBill view', () => {
   describe('When I fill the file input', () => {
-    test.only('Then it should populate the NewBill.formData (.fileName, .file, .email)', async () => {
+    test('Then it should populate the NewBill.formData (.fileName, .file, .email)', async () => {
+      const userEmail = 'a@a'
       localStorage.setItem(
         'user',
         JSON.stringify({
           type: 'Employee',
-          email: 'a@a',
+          email: userEmail,
         })
       )
 
@@ -91,7 +92,7 @@ describe('Given that I am on the FormNewBill view', () => {
         store: mockStore,
         localStorage: null,
       })
-      const handleChangeFile = jest.fn((e) => newBillModel.handleChangeFile(e))
+      // const handleChangeFile = jest.fn((e) => newBillModel.handleChangeFile(e))
       // TODO:(mentor) Pas possible de remplir un champs input:file avec userEvent.type(...)
       // Il faut passer par userEvent.upload qui demande un objet File
       const file = new File(['fichier test'], 'test/hello.png', {
@@ -101,6 +102,16 @@ describe('Given that I am on the FormNewBill view', () => {
       const fileInput = screen.getByTestId('file')
 
       await userEvent.upload(fileInput, file)
+
+      expect(newBillModel.formData.get('file')).toBe(file)
+      expect(newBillModel.formData.get('email')).toBe(userEmail)
+      expect(newBillModel.formData.get('file').name).toBe(file.name)
+    })
+  })
+
+  describe('When I submit a valid filled form', () => {
+    then('It should create a new bill in db', () => {
+      //
     })
   })
 })

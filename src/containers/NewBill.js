@@ -40,7 +40,6 @@ export default class NewBill {
     this.formData.append('file', file)
     this.formData.append('email', email)
     this.formData.append('fileName', fileName)
-
     // TODO: (mentor) quand un fichier est déposé (bonne extension), ca envoie directement une requete au backend pour créer une nouvelle note de frais dans la base de données. On laisse ca comme ca? => Même si on annule le form d'une nouvelle note de frais, on se retrouve avec une ligne mal remplie dans la vue Bills...
     // this.store
     //   .bills()
@@ -59,10 +58,6 @@ export default class NewBill {
   }
   handleSubmit = (e) => {
     e.preventDefault()
-    console.log(
-      'e.target.querySelector(`input[data-testid="datepicker"]`).value',
-      e.target.querySelector(`input[data-testid="datepicker"]`).value
-    )
     const email = JSON.parse(localStorage.getItem('user')).email
     const bill = {
       email,
