@@ -15,6 +15,10 @@ import Bills from '../containers/Bills.js'
 jest.mock('../app/store', () => mockStore)
 
 describe('Given I am connected as an employee', () => {
+  // Pour effacer le HTML pour les test d'ingégration
+  afterEach(() => {
+    document.body.innerHTML = ''
+  })
   describe('When I click on the New Bill button', () => {
     test('Then I should render the New Bill form', async () => {
       document.body.innerHTML = BillsUI({ data: bills })

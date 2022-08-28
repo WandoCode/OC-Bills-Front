@@ -26,14 +26,15 @@ export default class NewBill {
     const filePath = e.target.value.split(/\\/g)
     const fileName = filePath[filePath.length - 1]
     //TODO: (mentor) A mettre ou non? Pas utile si la restriction d'extension sur l'input:file est suffisante
-    const fileExtension = fileName.split('.').at(-1)
-    const authorizedExtensions = ['jpg', 'png', 'jpeg']
-    const fileHaveAuthorizedExtension = authorizedExtensions.some(
-      (a) => a === fileExtension
-    )
-    if (!fileHaveAuthorizedExtension) {
-      throw new Error('Accepted extensions: png, jpg, jpeg')
-    }
+    // TODO: si mis: ajouter un test
+    // const fileExtension = fileName.split('.').at(-1)
+    // const authorizedExtensions = ['jpg', 'png', 'jpeg']
+    // const fileHaveAuthorizedExtension = authorizedExtensions.some(
+    //   (a) => a === fileExtension
+    // )
+    // if (!fileHaveAuthorizedExtension) {
+    //   throw new Error('Accepted extensions: png, jpg, jpeg')
+    // }
     this.formData = new FormData()
     const email = JSON.parse(localStorage.getItem('user')).email
     this.formData.append('file', file)

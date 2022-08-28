@@ -22,6 +22,7 @@ describe('Given I am connected as an employee', () => {
         'user',
         JSON.stringify({
           type: 'Employee',
+          email: 'a@a',
         })
       )
       const root = document.createElement('div')
@@ -68,19 +69,29 @@ describe('Given I am connected as an employee', () => {
     })
   })
 })
+
 describe('Given that I am on the FormNewBill view', () => {
   describe('When I fill the file input', () => {
     test.only('Then it should populate the NewBill.formData (.fileName, .file, .email)', async () => {
+      localStorage.setItem(
+        'user',
+        JSON.stringify({
+          type: 'Employee',
+          email: 'a@a',
+        })
+      )
+
       document.body.innerHTML = NewBillUI()
+
       const onNavigate = () => {}
+
       const newBillModel = new NewBill({
         document,
         onNavigate,
         store: mockStore,
         localStorage: null,
       })
-      // FIXME: En cours, a terminer
-      // const handleChangeFile = jest.fn((e) => newBillModel.handleChangeFile(e))
+      const handleChangeFile = jest.fn((e) => newBillModel.handleChangeFile(e))
       // TODO:(mentor) Pas possible de remplir un champs input:file avec userEvent.type(...)
       // Il faut passer par userEvent.upload qui demande un objet File
       const file = new File(['fichier test'], 'test/hello.png', {
