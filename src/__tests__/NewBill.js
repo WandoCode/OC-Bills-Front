@@ -114,7 +114,7 @@ describe('Given that I am on the FormNewBill view', () => {
     })
   })
   describe('When I submit a valid filled form', () => {
-    test.only('It should compute correct datas for bill creation', async () => {
+    test('It should compute correct datas for bill creation', async () => {
       const mockFormData = {
         name: 'Bill Test',
         date: '2022-07-15',

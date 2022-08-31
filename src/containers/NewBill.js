@@ -15,7 +15,7 @@ export default class NewBill {
     this.fileUrl = null
     this.fileName = null
     this.billId = null
-    this.formData = null
+    this.formData = new FormData()
     new Logout({ document, localStorage, onNavigate })
   }
 
@@ -35,7 +35,6 @@ export default class NewBill {
     // if (!fileHaveAuthorizedExtension) {
     //   throw new Error('Accepted extensions: png, jpg, jpeg')
     // }
-    this.formData = new FormData()
     const email = JSON.parse(localStorage.getItem('user')).email
     this.formData.append('file', file)
     this.formData.append('email', email)
@@ -58,7 +57,9 @@ export default class NewBill {
   }
   handleSubmit = (e) => {
     e.preventDefault()
+
     const email = JSON.parse(localStorage.getItem('user')).email
+
     const bill = {
       email,
       type: e.target.querySelector(`select[data-testid="expense-type"]`).value,

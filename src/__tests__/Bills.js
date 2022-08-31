@@ -80,7 +80,7 @@ describe('Given I am connected as an employee', () => {
   })
 })
 
-// Test t'intégration GET //TODO: a finir
+// Test t'intégration GET
 describe('Given I am a user connected as employee', () => {
   describe('When I navigate to Bills view', () => {
     test('fetches bills from mock API GET', async () => {
