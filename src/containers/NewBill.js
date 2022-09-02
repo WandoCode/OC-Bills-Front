@@ -22,6 +22,7 @@ export default class NewBill {
     e.preventDefault()
     const fileElement = this.document.querySelector(`input[data-testid="file"]`)
     const file = fileElement.files[0]
+    console.log(e.target.value)
     const filePath = e.target.value.split(/\\/g)
     const fileName = filePath[filePath.length - 1]
 
@@ -31,13 +32,14 @@ export default class NewBill {
     const fileHaveAuthorizedExtension = authorizedExtensions.some(
       (a) => a === fileExtension
     )
+
     if (!fileHaveAuthorizedExtension) {
       fileElement.value = ''
       return
     }
 
-    const formData = new FormData()
     const email = JSON.parse(localStorage.getItem('user')).email
+    const formData = new FormData()
     formData.append('file', file)
     formData.append('email', email)
 
@@ -78,7 +80,6 @@ export default class NewBill {
       fileName: this.fileName,
       status: 'pending',
     }
-    console.log(bill)
     this.updateBill(bill)
     this.onNavigate(ROUTES_PATH['Bills'])
   }

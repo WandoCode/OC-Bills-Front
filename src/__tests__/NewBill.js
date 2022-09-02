@@ -15,6 +15,10 @@ import mockStore from '../__mocks__/store'
 import { bills } from '../fixtures/bills'
 import router from '../app/Router'
 
+afterEach(() => {
+  document.body.innerHTML = ''
+})
+
 describe('Given I am connected as an employee', () => {
   describe('When I am on NewBill Page', () => {
     beforeEach(() => {
@@ -66,6 +70,78 @@ describe('Given I am connected as an employee', () => {
 
       const file = screen.getByTestId('file')
       expect(file).toBeDefined()
+    })
+  })
+})
+
+describe('Given I am on the NewBillForm', () => {
+  describe('When I submit the form', () => {
+    test('Then it should trigger handleSubmit', () => {
+      localStorage.setItem(
+        'user',
+        JSON.stringify({
+          type: 'Employee',
+          email: 'a@a',
+        })
+      )
+
+      const mockEvent = {
+        target: { querySelector: jest.fn() },
+        preventDefault: jest.fn(),
+      }
+      mockEvent.target.querySelector.mockReturnValue('test value')
+
+      document.body.innerHTML = NewBillUI()
+
+      const onNavigate = () => {}
+      const newBillContainer = new NewBill({
+        document,
+        onNavigate,
+        store: mockStore,
+        localStorage,
+      })
+      const handleSubmit = jest.fn(() =>
+        newBillContainer.handleSubmit(mockEvent)
+      )
+
+      const sendBtn = screen.getByText('Envoyer')
+      sendBtn.addEventListener('click', handleSubmit)
+      userEvent.click(sendBtn)
+
+      expect(handleSubmit).toHaveBeenCalled()
+    })
+  })
+
+  describe('When I fill the file input correctly', () => {
+    test('Then it should trigger handleChangeFile', async () => {
+      localStorage.setItem(
+        'user',
+        JSON.stringify({
+          type: 'Employee',
+          email: 'a@a',
+        })
+      )
+      document.body.innerHTML = NewBillUI()
+
+      const onNavigate = () => {}
+      const newBillContainer = new NewBill({
+        document,
+        onNavigate,
+        store: mockStore,
+        localStorage,
+      })
+
+      const handleChangeFile = jest.fn((e) => {
+        newBillContainer.handleChangeFile(e)
+      })
+
+      const fileInput = screen.getByTestId('file')
+      const file = new File(['test'], 'test.png', { type: 'image/png' })
+      fileInput.addEventListener('change', handleChangeFile)
+
+      await userEvent.upload(fileInput, file)
+
+      expect(handleChangeFile).toHaveBeenCalled()
     })
   })
 })
