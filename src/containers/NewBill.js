@@ -15,51 +15,51 @@ export default class NewBill {
     this.fileUrl = null
     this.fileName = null
     this.billId = null
-    this.formData = new FormData()
     new Logout({ document, localStorage, onNavigate })
   }
 
   handleChangeFile = (e) => {
     e.preventDefault()
-    const file = this.document.querySelector(`input[data-testid="file"]`)
-      .files[0]
+    const fileElement = this.document.querySelector(`input[data-testid="file"]`)
+    const file = fileElement.files[0]
     const filePath = e.target.value.split(/\\/g)
     const fileName = filePath[filePath.length - 1]
-    //TODO: (mentor) A mettre ou non? Pas utile si la restriction d'extension sur l'input:file est suffisante
+
     // TODO: si mis: ajouter un test
-    // const fileExtension = fileName.split('.').at(-1)
-    // const authorizedExtensions = ['jpg', 'png', 'jpeg']
-    // const fileHaveAuthorizedExtension = authorizedExtensions.some(
-    //   (a) => a === fileExtension
-    // )
-    // if (!fileHaveAuthorizedExtension) {
-    //   throw new Error('Accepted extensions: png, jpg, jpeg')
-    // }
+    const fileExtension = fileName.split('.').at(-1)
+    const authorizedExtensions = ['jpg', 'png', 'jpeg']
+    const fileHaveAuthorizedExtension = authorizedExtensions.some(
+      (a) => a === fileExtension
+    )
+    if (!fileHaveAuthorizedExtension) {
+      fileElement.value = ''
+      return
+    }
+
+    const formData = new FormData()
     const email = JSON.parse(localStorage.getItem('user')).email
-    this.formData.append('file', file)
-    this.formData.append('email', email)
-    this.formData.append('fileName', fileName)
-    // TODO: (mentor) quand un fichier est déposé (bonne extension), ca envoie directement une requete au backend pour créer une nouvelle note de frais dans la base de données. On laisse ca comme ca? => Même si on annule le form d'une nouvelle note de frais, on se retrouve avec une ligne mal remplie dans la vue Bills...
-    // this.store
-    //   .bills()
-    //   .create({
-    //     data: formData,
-    //     headers: {
-    //       noContentType: true,
-    //     },
-    //   })
-    //   .then(({ fileUrl, key }) => {
-    //     this.billId = key
-    //     this.fileUrl = fileUrl
-    //     this.fileName = fileName
-    //   })
-    //   .catch((error) => console.error(error))
+    formData.append('file', file)
+    formData.append('email', email)
+
+    this.store
+      .bills()
+      .create({
+        data: formData,
+        headers: {
+          noContentType: true,
+        },
+      })
+      .then(({ fileUrl, key }) => {
+        this.billId = key
+        this.fileUrl = fileUrl
+        this.fileName = fileName
+      })
+      .catch((error) => console.error(error))
   }
+
   handleSubmit = (e) => {
     e.preventDefault()
-
     const email = JSON.parse(localStorage.getItem('user')).email
-
     const bill = {
       email,
       type: e.target.querySelector(`select[data-testid="expense-type"]`).value,
@@ -74,34 +74,13 @@ export default class NewBill {
         20,
       commentary: e.target.querySelector(`textarea[data-testid="commentary"]`)
         .value,
-      // fileUrl: this.fileUrl,
-      // fileName: this.fileName,
-      // status: 'pending',
+      fileUrl: this.fileUrl,
+      fileName: this.fileName,
+      status: 'pending',
     }
-
-    //TODO: juste faire le create(), sans devoir faire le update() ensuite...
-    this.store
-      .bills()
-      .create({
-        data: this.formData,
-        headers: {
-          noContentType: true,
-        },
-      })
-      .then(({ fileUrl, key }) => {
-        this.billId = key
-        this.fileUrl = fileUrl
-      })
-      // Added
-      .then(() => {
-        bill.billId = this.billId
-        bill.fileUrl = this.fileUrl
-        bill.status = 'pending'
-        this.updateBill(bill)
-      })
-      //Fin added
-      .catch((error) => console.error(error))
-    // this.updateBill(bill)
+    console.log(bill)
+    this.updateBill(bill)
+    this.onNavigate(ROUTES_PATH['Bills'])
   }
 
   // not need to cover this function by tests
