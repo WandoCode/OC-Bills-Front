@@ -76,7 +76,7 @@ describe('Given I am connected as an employee', () => {
 
 describe('Given I am on the NewBillForm', () => {
   describe('When I submit the form', () => {
-    test('Then it should trigger handleSubmit', () => {
+    test('Then it should trigger handleSubmit and I should be redirected to Bills view', () => {
       localStorage.setItem(
         'user',
         JSON.stringify({
@@ -129,7 +129,7 @@ describe('Given I am on the NewBillForm', () => {
       document.body.innerHTML = NewBillUI()
 
       const onNavigate = () => {}
-      const billsSpy = jest.spyOn(mockStore, 'bills')
+      // const billsSpy = jest.spyOn(mockStore, 'bills')
       const newBillContainer = new NewBill({
         document,
         onNavigate,
@@ -150,12 +150,14 @@ describe('Given I am on the NewBillForm', () => {
       await userEvent.upload(fileInput, file)
 
       expect(handleChangeFile).toHaveBeenCalled()
-      expect(billsSpy).toHaveBeenCalled()
+      // expect(billsSpy).toHaveBeenCalled()
     })
   })
 
   describe('When I fill the file input incorrectly (wrong file extension)', () => {
     test('Then it should not call for a bill creation via store', async () => {
+      jest.clearAllMocks()
+
       localStorage.setItem(
         'user',
         JSON.stringify({
@@ -191,6 +193,102 @@ describe('Given I am on the NewBillForm', () => {
 
       expect(handleChangeFile).toHaveBeenCalled()
       expect(billsSpy).not.toHaveBeenCalled()
+    })
+  })
+
+  describe('When I submit the form', () => {
+    test('Then it should trigger updateBill to upadte bill via store and redirect to Bills view', () => {
+      localStorage.setItem(
+        'user',
+        JSON.stringify({
+          type: 'Employee',
+          email: 'a@a',
+        })
+      )
+
+      const mockEvent = {
+        target: { querySelector: jest.fn() },
+        preventDefault: jest.fn(),
+      }
+      mockEvent.target.querySelector.mockReturnValue('test value')
+
+      document.body.innerHTML = NewBillUI()
+
+      const onNavigate = (pathname) => {
+        document.body.innerHTML = ROUTES({ pathname })
+      }
+
+      const newBillContainer = new NewBill({
+        document,
+        onNavigate,
+        store: mockStore,
+        localStorage,
+      })
+      const spyUpdate = jest.spyOn(newBillContainer, 'updateBill')
+
+      const handleSubmit = jest.fn(() =>
+        newBillContainer.handleSubmit(mockEvent)
+      )
+
+      const sendBtn = screen.getByText('Envoyer')
+      sendBtn.addEventListener('click', handleSubmit)
+      userEvent.click(sendBtn)
+
+      expect(handleSubmit).toHaveBeenCalled()
+      expect(spyUpdate).toHaveBeenCalled()
+      expect(screen.getAllByText('Mes notes de frais')).toBeTruthy()
+    })
+  })
+
+  describe('When I fill the file input correctly', () => {
+    test('Then it should POST to the API', async () => {
+      localStorage.setItem(
+        'user',
+        JSON.stringify({
+          type: 'Employee',
+          email: 'a@a',
+        })
+      )
+      document.body.innerHTML = NewBillUI()
+
+      const onNavigate = () => {}
+
+      const billsSpy = jest.spyOn(mockStore, 'bills')
+
+      const spyCreate = jest.fn(() => {
+        return Promise.resolve({})
+      })
+
+      mockStore.bills.mockImplementationOnce(() => {
+        return {
+          create: spyCreate,
+        }
+      })
+
+      const newBillContainer = new NewBill({
+        document,
+        onNavigate,
+        store: mockStore,
+        localStorage,
+      })
+
+      const handleChangeFile = jest.fn(() => {
+        const mockEvent = {}
+        mockEvent.preventDefault = jest.fn()
+        mockEvent.target = { value: 'OK.png' }
+        newBillContainer.handleChangeFile(mockEvent)
+      })
+
+      const fileInput = screen.getByTestId('file')
+      const file = new File(['test'], 'test.png', { type: 'image/png' })
+
+      fileInput.addEventListener('change', handleChangeFile)
+
+      await userEvent.upload(fileInput, file)
+
+      expect(handleChangeFile).toHaveBeenCalled()
+      expect(billsSpy).toHaveBeenCalled()
+      expect(spyCreate).toHaveBeenCalled()
     })
   })
 })

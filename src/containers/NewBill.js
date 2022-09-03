@@ -22,6 +22,7 @@ export default class NewBill {
     e.preventDefault()
     const fileElement = this.document.querySelector(`input[data-testid="file"]`)
     const file = fileElement.files[0]
+    console.log(e.target.value)
     const filePath = e.target.value.split(/\\/g)
     const fileName = filePath[filePath.length - 1]
 
