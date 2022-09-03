@@ -65,7 +65,7 @@ describe('Given I am connected as an employee', () => {
   })
 })
 
-describe('Given I am on the NewBillForm', () => {
+describe('Given I am on the NewBill view', () => {
   beforeEach(() => {
     jest.clearAllMocks()
 

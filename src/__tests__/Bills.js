@@ -13,7 +13,7 @@ import Bills from '../containers/Bills.js'
 
 jest.mock('../app/store', () => mockStore)
 
-describe('Given I am connected as an employee', () => {
+describe('Given I am on the Bills view', () => {
   describe('When I click on the New Bill button', () => {
     test('Then I should go to the NewBill view', async () => {
       document.body.innerHTML = BillsUI({ data: bills })
@@ -56,7 +56,7 @@ describe('Given I am connected as an employee', () => {
     })
   })
 
-  describe('When I am on Bills page, there are 4 bills', () => {
+  describe('When 4 bills are available in the store', () => {
     test('Then getBills should return 4 bills', async () => {
       const onNavigate = () => {}
 
@@ -80,7 +80,7 @@ describe('Given I am a user connected as employee', () => {
     document.body.innerHTML = ''
   })
   describe('When I navigate to Bills view', () => {
-    test('fetches bills from mock API GET', async () => {
+    test('Then it should fetches bills from mock API GET', async () => {
       const nbrBillsInMockStore = (await mockStore.bills().list()).length
 
       localStorage.setItem(
@@ -117,7 +117,7 @@ describe('Given I am a user connected as employee', () => {
       router()
     })
 
-    test('fetches bills from an API and fails with 404 message error', async () => {
+    test('Then it should fetches bills from an API and fails with 404 message error', async () => {
       mockStore.bills.mockImplementationOnce(() => {
         return {
           list: () => {
@@ -132,7 +132,7 @@ describe('Given I am a user connected as employee', () => {
       expect(message).toBeTruthy()
     })
 
-    test('fetches bills from an API and fails with 500 message error', async () => {
+    test('Then it should fetches bills from an API and fails with 500 message error', async () => {
       mockStore.bills.mockImplementationOnce(() => {
         return {
           list: () => {
