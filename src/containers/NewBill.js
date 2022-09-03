@@ -25,7 +25,6 @@ export default class NewBill {
     const filePath = e.target.value.split(/\\/g)
     const fileName = filePath[filePath.length - 1]
 
-    // TODO: si mis: ajouter un test
     const fileExtension = fileName.split('.').at(-1)
     const authorizedExtensions = ['jpg', 'png', 'jpeg']
     const fileHaveAuthorizedExtension = authorizedExtensions.some(

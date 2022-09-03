@@ -33,7 +33,7 @@ describe('Given I am connected as an employee', () => {
       expect(mailIcon.classList.contains('active-icon')).toBeTruthy()
     })
 
-    test('Then the FormNewBill should be rendered', async () => {
+    test('Then the FormNewBill should be rendered with all the input field', async () => {
       await waitFor(() => screen.getByTestId('form-new-bill'))
       const formNewBill = screen.getByTestId('form-new-bill')
       expect(formNewBill).toBeDefined()
@@ -76,11 +76,12 @@ describe('Given I am on the NewBillForm', () => {
         email: 'a@a',
       })
     )
+
     document.body.innerHTML = NewBillUI()
   })
 
-  describe('When I submit the form', () => {
-    test('Then it should trigger handleSubmit', () => {
+  describe('When I trigger handleSubmit', () => {
+    test('Then it should trigger updateBill and onNavigate', async () => {
       const mockEvent = {
         target: { querySelector: jest.fn() },
         preventDefault: jest.fn(),
@@ -88,7 +89,6 @@ describe('Given I am on the NewBillForm', () => {
       mockEvent.target.querySelector.mockReturnValue('test value')
 
       const onNavigate = () => {}
-
       const newBillContainer = new NewBill({
         document,
         onNavigate,
@@ -96,86 +96,121 @@ describe('Given I am on the NewBillForm', () => {
         localStorage,
       })
 
-      const handleSubmit = jest.fn(() =>
-        newBillContainer.handleSubmit(mockEvent)
-      )
+      const spyOnNavigate = jest.fn()
+      const spyUpdateBill = jest.fn()
 
-      const sendBtn = screen.getByText('Envoyer')
-      sendBtn.addEventListener('click', handleSubmit)
-      userEvent.click(sendBtn)
+      newBillContainer.onNavigate = spyOnNavigate
+      newBillContainer.updateBill = spyUpdateBill
 
-      expect(handleSubmit).toHaveBeenCalled()
+      await newBillContainer.handleSubmit(mockEvent)
+
+      expect(spyOnNavigate).toHaveBeenCalled()
+      expect(spyUpdateBill).toHaveBeenCalled()
     })
-    test('Then it should trigger updateBill to update(POST) API and redirect me to the Bills view', () => {
-      const mockEvent = {
-        target: { querySelector: jest.fn() },
-        preventDefault: jest.fn(),
-      }
 
-      mockEvent.target.querySelector.mockReturnValue('test value')
+    // Integration POST: submit new bill
+    describe('When I click to submit form', () => {
+      test('Then it should trigger the updateBill fct to update(POST) API and then it should redirect me to the Bills view', () => {
+        const mockEvent = {
+          target: { querySelector: jest.fn() },
+          preventDefault: jest.fn(),
+        }
 
-      const onNavigate = (pathname) => {
-        document.body.innerHTML = ROUTES({ pathname })
-      }
+        mockEvent.target.querySelector.mockReturnValue('test value')
 
-      const newBillContainer = new NewBill({
-        document,
-        onNavigate,
-        store: mockStore,
-        localStorage,
+        const onNavigate = (pathname) => {
+          document.body.innerHTML = ROUTES({ pathname })
+        }
+
+        const newBillContainer = new NewBill({
+          document,
+          onNavigate,
+          store: mockStore,
+          localStorage,
+        })
+
+        const spyUpdate = jest.spyOn(newBillContainer, 'updateBill')
+
+        // Mock handleSubmit to be able to use the mockEvent
+        const handleSubmit = jest.fn(() =>
+          newBillContainer.handleSubmit(mockEvent)
+        )
+
+        const sendBtn = screen.getByText('Envoyer')
+        sendBtn.addEventListener('click', handleSubmit)
+        userEvent.click(sendBtn)
+
+        expect(handleSubmit).toHaveBeenCalled()
+        expect(spyUpdate).toHaveBeenCalled()
+        expect(screen.getAllByText('Mes notes de frais')).toBeTruthy()
       })
-
-      const spyUpdate = jest.spyOn(newBillContainer, 'updateBill')
-
-      const handleSubmit = jest.fn(() =>
-        newBillContainer.handleSubmit(mockEvent)
-      )
-
-      const sendBtn = screen.getByText('Envoyer')
-      sendBtn.addEventListener('click', handleSubmit)
-      userEvent.click(sendBtn)
-
-      expect(handleSubmit).toHaveBeenCalled()
-      expect(spyUpdate).toHaveBeenCalled()
-      expect(screen.getAllByText('Mes notes de frais')).toBeTruthy()
     })
   })
 
-  describe('When I fill the file input correctly', () => {
-    test('Then it should trigger handleChangeFile', async () => {
-      const onNavigate = () => {}
+  describe('When handleFileChange is triggered', () => {
+    describe('As expected', () => {
+      test('Then it should call bills fn from store and change billId, fileUrl and fileName ', async () => {
+        const billsSpy = jest.spyOn(mockStore, 'bills')
+        const onNavigate = () => {}
 
-      const newBillContainer = new NewBill({
-        document,
-        onNavigate,
-        store: mockStore,
-        localStorage,
-      })
+        const newBillContainer = new NewBill({
+          document,
+          onNavigate,
+          store: mockStore,
+          localStorage,
+        })
 
-      const handleChangeFile = jest.fn(() => {
         const mockEvent = {}
         mockEvent.preventDefault = jest.fn()
         mockEvent.target = { value: 'OK.png' }
-        newBillContainer.handleChangeFile(mockEvent)
+
+        const fileInput = screen.getByTestId('file')
+        const file = new File(['test'], 'test.png', { type: 'image/png' })
+        await userEvent.upload(fileInput, file)
+
+        await newBillContainer.handleChangeFile(mockEvent)
+
+        expect(billsSpy).toHaveBeenCalled()
+
+        expect(newBillContainer.billId).not.toBeNull()
+        expect(newBillContainer.fileUrl).not.toBeNull()
+        expect(newBillContainer.fileName).not.toBeNull()
       })
-
-      const fileInput = screen.getByTestId('file')
-      const file = new File(['test'], 'test.png', { type: 'image/png' })
-      fileInput.addEventListener('change', handleChangeFile)
-
-      await userEvent.upload(fileInput, file)
-
-      expect(handleChangeFile).toHaveBeenCalled()
-
-      // Check fct executed correctly
-      expect(newBillContainer.billId).not.toBeNull()
-      expect(newBillContainer.fileUrl).not.toBeNull()
-      expect(newBillContainer.fileName).not.toBeNull()
     })
-    test('Then it should POST to the API', async () => {
+
+    describe('With a wrong extension', () => {
+      test('Then it should not call for a bill creation via store', async () => {
+        const billsSpy = jest.spyOn(mockStore, 'bills')
+
+        const onNavigate = () => {}
+
+        const newBillContainer = new NewBill({
+          document,
+          onNavigate,
+          store: mockStore,
+          localStorage,
+        })
+        const mockEvent = {}
+        mockEvent.preventDefault = jest.fn()
+        mockEvent.target = { value: 'NOK.txt' }
+
+        const fileInput = screen.getByTestId('file')
+        const file = new File(['test'], 'test.txt', { type: 'plain/txt' })
+        await userEvent.upload(fileInput, file)
+
+        await newBillContainer.handleChangeFile(mockEvent)
+
+        expect(billsSpy).not.toHaveBeenCalled()
+      })
+    })
+  })
+
+  // Integration POST a new file
+  describe('When I load a file in the file input', () => {
+    test('Then it should POST to the API (trigger create fct in store)', async () => {
       const onNavigate = () => {}
 
-      const billsSpy = jest.spyOn(mockStore, 'bills')
+      jest.spyOn(mockStore, 'bills')
 
       const spyCreate = jest.fn(() => {
         return Promise.resolve({})
@@ -194,58 +229,17 @@ describe('Given I am on the NewBillForm', () => {
         localStorage,
       })
 
-      const handleChangeFile = jest.fn(() => {
-        const mockEvent = {}
-        mockEvent.preventDefault = jest.fn()
-        mockEvent.target = { value: 'OK.png' }
-        newBillContainer.handleChangeFile(mockEvent)
-      })
+      const mockEvent = {}
+      mockEvent.preventDefault = jest.fn()
+      mockEvent.target = { value: 'OK.png' }
 
       const fileInput = screen.getByTestId('file')
       const file = new File(['test'], 'test.png', { type: 'image/png' })
-
-      fileInput.addEventListener('change', handleChangeFile)
-
       await userEvent.upload(fileInput, file)
 
-      expect(handleChangeFile).toHaveBeenCalled()
-      expect(billsSpy).toHaveBeenCalled()
+      await newBillContainer.handleChangeFile(mockEvent)
+
       expect(spyCreate).toHaveBeenCalled()
-    })
-  })
-
-  describe('When I fill the file input incorrectly (wrong file extension)', () => {
-    test('Then it should not call for a bill creation via store', async () => {
-      const billsSpy = jest.spyOn(mockStore, 'bills')
-
-      const onNavigate = () => {}
-
-      const newBillContainer = new NewBill({
-        document,
-        onNavigate,
-        store: mockStore,
-        localStorage,
-      })
-
-      const handleChangeFile = jest.fn(() => {
-        const mockEvent = {}
-        mockEvent.preventDefault = jest.fn()
-        mockEvent.target = { value: 'NOK.txt' }
-        newBillContainer.handleChangeFile(mockEvent)
-      })
-
-      const fileInput = screen.getByTestId('file')
-      const file = new File(['test'], 'test.png', { type: 'image/png' })
-      fileInput.addEventListener('change', handleChangeFile)
-
-      await userEvent.upload(fileInput, file)
-
-      expect(handleChangeFile).toHaveBeenCalled()
-      expect(billsSpy).not.toHaveBeenCalled()
-
-      expect(newBillContainer.billId).toBeNull()
-      expect(newBillContainer.fileUrl).toBeNull()
-      expect(newBillContainer.fileName).toBeNull()
     })
   })
 })

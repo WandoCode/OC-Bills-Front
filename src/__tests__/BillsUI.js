@@ -69,7 +69,7 @@ describe('Given I am connected as an employee', () => {
   })
 
   describe('When I am on Bills page but back-end return an error message', () => {
-    test('then it should render Loading page', () => {
+    test('then it should render Error page', () => {
       document.body.innerHTML = BillsUI({ error: 'error message' })
       expect(screen.getAllByText('Erreur')).toBeTruthy()
     })
