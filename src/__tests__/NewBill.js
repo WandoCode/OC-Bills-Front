@@ -93,13 +93,17 @@ describe('Given I am on the NewBillForm', () => {
 
       document.body.innerHTML = NewBillUI()
 
-      const onNavigate = () => {}
+      const onNavigate = (pathname) => {
+        document.body.innerHTML = ROUTES({ pathname })
+      }
+
       const newBillContainer = new NewBill({
         document,
         onNavigate,
         store: mockStore,
         localStorage,
       })
+
       const handleSubmit = jest.fn(() =>
         newBillContainer.handleSubmit(mockEvent)
       )
@@ -109,6 +113,7 @@ describe('Given I am on the NewBillForm', () => {
       userEvent.click(sendBtn)
 
       expect(handleSubmit).toHaveBeenCalled()
+      expect(screen.getAllByText('Mes notes de frais')).toBeTruthy()
     })
   })
 
@@ -124,15 +129,18 @@ describe('Given I am on the NewBillForm', () => {
       document.body.innerHTML = NewBillUI()
 
       const onNavigate = () => {}
+      const billsSpy = jest.spyOn(mockStore, 'bills')
       const newBillContainer = new NewBill({
         document,
         onNavigate,
         store: mockStore,
         localStorage,
       })
-
-      const handleChangeFile = jest.fn((e) => {
-        newBillContainer.handleChangeFile(e)
+      const handleChangeFile = jest.fn(() => {
+        const mockEvent = {}
+        mockEvent.preventDefault = jest.fn()
+        mockEvent.target = { value: 'OK.png' }
+        newBillContainer.handleChangeFile(mockEvent)
       })
 
       const fileInput = screen.getByTestId('file')
@@ -142,6 +150,49 @@ describe('Given I am on the NewBillForm', () => {
       await userEvent.upload(fileInput, file)
 
       expect(handleChangeFile).toHaveBeenCalled()
+      expect(billsSpy).toHaveBeenCalled()
+    })
+  })
+
+  describe('When I fill the file input incorrectly (wrong file extension)', () => {
+    test('Then it should not call for a bill creation via store', async () => {
+      localStorage.setItem(
+        'user',
+        JSON.stringify({
+          type: 'Employee',
+          email: 'a@a',
+        })
+      )
+      document.body.innerHTML = NewBillUI()
+
+      const billsSpy = jest.spyOn(mockStore, 'bills')
+
+      const onNavigate = () => {}
+
+      const newBillContainer = new NewBill({
+        document,
+        onNavigate,
+        store: mockStore,
+        localStorage,
+      })
+
+      const handleChangeFile = jest.fn(() => {
+        const mockEvent = {}
+        mockEvent.preventDefault = jest.fn()
+        mockEvent.target = { value: 'NOK.txt' }
+        newBillContainer.handleChangeFile(mockEvent)
+      })
+
+      const fileInput = screen.getByTestId('file')
+      const file = new File(['test'], 'test.png', { type: 'image/png' })
+      fileInput.addEventListener('change', handleChangeFile)
+
+      await userEvent.upload(fileInput, file)
+
+      expect(handleChangeFile).toHaveBeenCalled()
+      expect(billsSpy).not.toHaveBeenCalled()
     })
   })
 })
+
+// TODO: POST test????
