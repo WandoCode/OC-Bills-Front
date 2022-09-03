@@ -3,11 +3,10 @@
  */
 import $ from 'jquery'
 import userEvent from '@testing-library/user-event'
-import { fireEvent, screen, waitFor, prettyDOM } from '@testing-library/dom'
+import { screen, waitFor } from '@testing-library/dom'
 import BillsUI from '../views/BillsUI.js'
 import { bills } from '../fixtures/bills.js'
 import { ROUTES, ROUTES_PATH } from '../constants/routes.js'
-import { localStorageMock } from '../__mocks__/localStorage.js'
 import mockStore from './../__mocks__/store'
 import router from '../app/Router.js'
 import Bills from '../containers/Bills.js'
@@ -15,25 +14,20 @@ import Bills from '../containers/Bills.js'
 jest.mock('../app/store', () => mockStore)
 
 describe('Given I am connected as an employee', () => {
-  // Pour effacer le HTML pour les test d'ingégration
-  afterEach(() => {
-    document.body.innerHTML = ''
-  })
   describe('When I click on the New Bill button', () => {
-    test('Then I should render the New Bill form', async () => {
+    test('Then I should go to the NewBill view', async () => {
       document.body.innerHTML = BillsUI({ data: bills })
 
       const onNavigate = (pathname) => {
         document.body.innerHTML = ROUTES({ pathname })
       }
-      // Ajoute la logique à BillsUI
+
       new Bills({ document, onNavigate, store: null, localStorage: null })
-      // Mime un clic sur le btn 'nouvelle note de frais'
+
       const btnNewBill = screen.getByTestId('btn-new-bill')
-      fireEvent.click(btnNewBill)
-      // Vérifie que le formulaire s'est ouvert
-      const formNewBill = screen.getByTestId('form-new-bill')
-      expect(formNewBill).toBeTruthy()
+      userEvent.click(btnNewBill)
+
+      expect(screen.getByTestId('form-new-bill')).toBeTruthy()
     })
   })
 
@@ -82,6 +76,9 @@ describe('Given I am connected as an employee', () => {
 
 // Test t'intégration GET
 describe('Given I am a user connected as employee', () => {
+  beforeEach(() => {
+    document.body.innerHTML = ''
+  })
   describe('When I navigate to Bills view', () => {
     test('fetches bills from mock API GET', async () => {
       const nbrBillsInMockStore = (await mockStore.bills().list()).length
@@ -109,7 +106,6 @@ describe('Given I am a user connected as employee', () => {
 
   describe('When an error occurs on API', () => {
     beforeEach(() => {
-      // .bills doit être mocker pour pouvoir ensuite utilisé .mockImplementationOnce dans chaque test
       jest.spyOn(mockStore, 'bills')
       localStorage.setItem(
         'user',
